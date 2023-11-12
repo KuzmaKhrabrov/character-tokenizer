@@ -40,7 +40,16 @@ class CharacterTokenizer(PreTrainedTokenizer):
         unk_token = AddedToken("[UNK]", lstrip=False, rstrip=False)
 
         mask_token = AddedToken("[MASK]", lstrip=True, rstrip=False)
-
+        self._vocab_str_to_int = {
+            "[CLS]": 0,
+            "[SEP]": 1,
+            "[BOS]": 2,
+            "[MASK]": 3,
+            "[PAD]": 4,
+            "[RESERVED]": 5,
+            "[UNK]": 6,
+            **{ch: i + 7 for i, ch in enumerate(characters)},
+        }
         super().__init__(
             bos_token=bos_token,
             eos_token=eos_token,
@@ -54,16 +63,6 @@ class CharacterTokenizer(PreTrainedTokenizer):
             **kwargs,
         )
 
-        self._vocab_str_to_int = {
-            "[CLS]": 0,
-            "[SEP]": 1,
-            "[BOS]": 2,
-            "[MASK]": 3,
-            "[PAD]": 4,
-            "[RESERVED]": 5,
-            "[UNK]": 6,
-            **{ch: i + 7 for i, ch in enumerate(characters)},
-        }
         self._vocab_int_to_str = {v: k for k, v in self._vocab_str_to_int.items()}
 
     @property
@@ -126,7 +125,10 @@ class CharacterTokenizer(PreTrainedTokenizer):
             "char_ords": [ord(ch) for ch in self.characters],
             "model_max_length": self.model_max_length,
         }
-
+    
+    def get_vocab(self):
+        return self._vocab_str_to_int
+    
     @classmethod
     def from_config(cls, config: Dict) -> "CharacterTokenizer":
         cfg = {}
